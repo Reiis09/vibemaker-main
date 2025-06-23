@@ -101,7 +101,7 @@ class InicioPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'BRAGA MERDA!',
+                    'IPCA PBL!',
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

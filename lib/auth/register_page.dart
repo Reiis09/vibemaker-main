@@ -55,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
-      final url = Uri.parse('http://10.0.2.2:5120/api/utilizadores/register');
+      final url = Uri.parse('http://10.0.2.2:5018/api/utilizadores/register');
       // ou IP real da tua máquina na rede
 
       final response = await http.post(
