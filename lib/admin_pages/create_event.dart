@@ -14,22 +14,17 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _localController = TextEditingController();
-  final TextEditingController _dataController = TextEditingController();
   final TextEditingController _descricaoController = TextEditingController();
-  final TextEditingController _imagemController = TextEditingController();
+  final TextEditingController _dataController = TextEditingController();
   final TextEditingController _precoController = TextEditingController();
   final TextEditingController _lotacaoController = TextEditingController();
 
   bool _destaque = false;
-
   bool _isLoading = false;
   String? _errorMessage;
 
   Future<void> _enviarEvento() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -37,18 +32,22 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
     });
 
     final evento = {
-      'Titulo': _nomeController.text.trim(),
-      'local': _localController.text.trim(),
-      'data': _dataController.text.trim(),
-      'descricao': _descricaoController.text.trim(),
-      'imagem': _imagemController.text.trim(),
-      'destaque': _destaque,
-      'preco': _precoController.text.trim(),
-      'lotacao': int.tryParse(_lotacaoController.text.trim()) ?? 0,
+      "nome_evento": _nomeController.text.trim(),
+      "descricao": _descricaoController.text.trim(),
+      "preco": double.tryParse(_precoController.text.trim()) ?? 0.0,
+      "data_hora_evento": _dataController.text.trim(),
+      "n_inscritos": 0,
+      "cap_max": int.tryParse(_lotacaoController.text.trim()) ?? 0,
+      "id_local": 1,
+      "id_polo": 1,
+      "id_tipo_evento": 1,
+      "id_estado_evento": 1,
+      "id_moeda": 1,
+      "destaque": _destaque,
     };
 
     try {
-      final url = Uri.parse('http://10.0.2.2:5120/api/eventos/create');
+      final url = Uri.parse('http://10.0.2.2:5018/evento');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -56,7 +55,6 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
       );
 
       if (response.statusCode == 200) {
-        // sucesso
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Evento criado com sucesso!')),
@@ -67,12 +65,9 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
           );
         }
       } else {
-        debugPrint('Erro no servidor: ${response.statusCode}');
-        debugPrint('Resposta do servidor: ${response.body}');
-
         setState(() {
           _errorMessage =
-              'Erro ao criar evento. Código: ${response.statusCode}';
+              'Erro ao criar evento. Código: ${response.statusCode}\n${response.body}';
         });
       }
     } catch (e) {
@@ -89,20 +84,16 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
   @override
   void dispose() {
     _nomeController.dispose();
-    _localController.dispose();
-    _dataController.dispose();
     _descricaoController.dispose();
-    _imagemController.dispose();
+    _dataController.dispose();
     _precoController.dispose();
     _lotacaoController.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Mantendo o fundo gradiente das outras páginas
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -139,18 +130,6 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
                   ),
                   const SizedBox(height: 12),
                   _buildTextField(
-                    _localController,
-                    'Local do Evento',
-                    'Local é obrigatório',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    _dataController,
-                    'Data (ex: 2025-06-20)',
-                    'Data é obrigatória',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
                     _descricaoController,
                     'Descrição',
                     'Descrição é obrigatória',
@@ -158,14 +137,14 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
                   ),
                   const SizedBox(height: 12),
                   _buildTextField(
-                    _imagemController,
-                    'URL da Imagem',
-                    'Imagem é obrigatória',
+                    _dataController,
+                    'Data e Hora (ex: 2025-06-25T21:00:00)',
+                    'Data é obrigatória',
                   ),
                   const SizedBox(height: 12),
                   _buildTextField(
                     _precoController,
-                    'Preço (ex: 10€ ou 12.50)',
+                    'Preço (ex: 10.0)',
                     'Preço é obrigatório',
                   ),
                   const SizedBox(height: 12),
@@ -179,9 +158,9 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
                     children: [
                       Checkbox(
                         value: _destaque,
-                        onChanged: (val) {
+                        onChanged: (value) {
                           setState(() {
-                            _destaque = val ?? false;
+                            _destaque = value ?? false;
                           });
                         },
                       ),
@@ -199,7 +178,7 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
                         style: const TextStyle(color: Colors.redAccent),
                       ),
                     ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _enviarEvento,
                     style: ElevatedButton.styleFrom(

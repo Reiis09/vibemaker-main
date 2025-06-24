@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:vibemaker/user_pages/home_page.dart';
+import 'package:vibemaker/engine_codes/userid.dart'; // <-- importa para guardar o userId
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -68,10 +69,17 @@ class _RegisterPageState extends State<RegisterPage> {
       debugPrint('Resposta: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        final json = jsonDecode(response.body);
+
+        // Guarda o userId na sessão a partir da resposta do servidor
+        final int userId = json['id'];
+        UserSession().userId = userId;
+        debugPrint('UserId guardado na sessão: $userId');
+
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
           );
         }
       } else if (response.statusCode == 409) {

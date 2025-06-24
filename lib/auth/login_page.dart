@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:vibemaker/admin_pages/adminhome_page.dart';
+import 'package:vibemaker/engine_codes/userid.dart';
 
 import '../user_pages/home_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -48,6 +49,13 @@ class _LoginPageState extends State<LoginPage> {
       debugPrint('Resposta: ${response.body}');
 
       if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+
+        final int userId = json['id'];
+        // Guarda o userId na sessão
+        UserSession().userId = userId;
+        debugPrint('UserId guardado na sessão: $userId');
+
         if (!mounted) return;
 
         if (email.toLowerCase() == 'admin') {
@@ -58,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
           );
         }
       } else {

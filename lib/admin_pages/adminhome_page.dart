@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vibemaker/admin_pages/create_event.dart';
+import 'package:vibemaker/admin_pages/viewevents.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
@@ -53,10 +54,15 @@ class AdminPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 _buildAdminButton(
                   context,
-                  icon: Icons.event_note,
+                  icon: Icons.add_circle_outline,
                   text: "Ver Eventos",
                   onTap: () {
-                    Navigator.pushNamed(context, '/ver-eventos');
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const VerEventosPage(),
+                      ),
+                    );
                   },
                 ),
               ],

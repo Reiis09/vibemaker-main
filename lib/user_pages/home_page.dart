@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:vibemaker/user_pages/tickets.dart';
+import 'package:vibemaker/user_pages/Events.dart';
+import 'package:vibemaker/user_pages/ViewTickets.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int userId; // <- adiciona isto
+  const HomePage({super.key, required this.userId});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -13,24 +15,24 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    const InicioPage(),
-    const EventosPage(),
-    // const NovoEventoPage(),
-    // const MenuPage(),
-    Center(
-      child: Text("Eventos", style: TextStyle(color: Colors.white)),
-    ),
-    Center(
-      child: Text("Novo Evento", style: TextStyle(color: Colors.white)),
-    ),
-    Center(
-      child: Text("Menu", style: TextStyle(color: Colors.white)),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      const InicioPage(),
+      const EventosPage(),
+      BilhetesCompradosPage(userId: widget.userId),
+      // const MenuPage(),
+      Center(
+        child: Text("Eventos", style: TextStyle(color: Colors.white)),
+      ),
+      Center(
+        child: Text("Novo Evento", style: TextStyle(color: Colors.white)),
+      ),
+      Center(
+        child: Text("Menu", style: TextStyle(color: Colors.white)),
+      ),
+    ];
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
