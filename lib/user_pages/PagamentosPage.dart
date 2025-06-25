@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:vibemaker/user_pages/ViewTickets.dart';
+import 'package:vibemaker/user_pages/home_page.dart';
 
 class PagamentoPage extends StatefulWidget {
   final Map<String, dynamic> evento;
@@ -42,11 +44,10 @@ class _PagamentoPageState extends State<PagamentoPage> {
     setState(() => _isProcessing = true);
 
     try {
-      // Atualizar n_inscritos (igual)
       final eventoId = widget.evento['id_evento'];
       final novoNInscritos = (widget.evento['n_inscritos'] ?? 0) + 1;
-      final eventoAtualizado = Map<String, dynamic>.from(widget.evento);
-      eventoAtualizado['n_inscritos'] = novoNInscritos;
+      final eventoAtualizado = Map<String, dynamic>.from(widget.evento)
+        ..['n_inscritos'] = novoNInscritos;
 
       final eventoResp = await http.put(
         Uri.parse('http://10.0.2.2:5018/evento/$eventoId'),
@@ -58,21 +59,15 @@ class _PagamentoPageState extends State<PagamentoPage> {
         throw Exception('Erro ao atualizar o evento');
       }
 
-      // Criar registo na tabela Inscricao
       final inscricao = {
         "id_evento": eventoId,
         "data_inscricao": DateTime.now().toIso8601String(),
         "id_pagamentos": _mapearMetodoPagamento(_metodoSelecionado!),
         "id_estado_inscricao": 1,
-        "id_user": widget
-            .userId, // <-- Corrigido aqui: mudou de "id_utilizador" para "id_user"
+        "id_user": widget.userId,
         "valor_pago": widget.evento['preco'],
         "qrcode": "qrcode_${DateTime.now().millisecondsSinceEpoch}",
       };
-
-      // DEBUG: imprimir o JSON que será enviado
-      print('JSON inscrição a enviar: ${jsonEncode(inscricao)}');
-      print('Valor de userId: ${widget.userId}');
 
       final inscricaoResp = await http.post(
         Uri.parse('http://10.0.2.2:5018/Inscricao'),
@@ -85,10 +80,11 @@ class _PagamentoPageState extends State<PagamentoPage> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Compra simulada com sucesso!')),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => CompraProcessamentoPage(userId: widget.userId),
+          ),
         );
-        Navigator.pop(context);
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -116,75 +112,226 @@ class _PagamentoPageState extends State<PagamentoPage> {
             end: Alignment.bottomLeft,
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Escolhe o método de pagamento',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(0, 2),
-                      blurRadius: 4,
-                      color: Colors.black45,
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              _metodoRadio('MBWay'),
-              _metodoRadio('Multibanco'),
-              _metodoRadio('Visa'),
-              _metodoRadio('Saldo da Carteira'),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: _isProcessing ? null : _confirmarCompra,
-                icon: const Icon(Icons.check_circle_outline),
-                label: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: _isProcessing
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(color: Colors.white),
-                        )
-                      : const Text(
-                          'Confirmar Compra',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: corPrincipal,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Escolhe o método de pagamento',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(0, 2),
+                        blurRadius: 4,
+                        color: Colors.black45,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 30),
+                ...[
+                  'MBWay',
+                  'Multibanco',
+                  'Visa',
+                  'Saldo da Carteira',
+                ].map((metodo) => _buildMetodoCard(metodo)).toList(),
+                const Spacer(),
+                ElevatedButton.icon(
+                  onPressed: _isProcessing ? null : _confirmarCompra,
+                  icon: _isProcessing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Color.fromARGB(255, 130, 39, 254),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.check_circle_outline),
+                  label: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      _isProcessing ? 'A processar...' : 'Confirmar Compra',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: corPrincipal,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _metodoRadio(String metodo) {
-    return ListTile(
-      title: Text(metodo, style: const TextStyle(color: Colors.white)),
-      leading: Radio<String>(
-        value: metodo,
-        groupValue: _metodoSelecionado,
-        onChanged: (value) {
-          setState(() => _metodoSelecionado = value);
-        },
-        activeColor: Colors.white,
-        fillColor: MaterialStateProperty.all(Colors.white),
+  Widget _buildMetodoCard(String metodo) {
+    final bool isSelected = _metodoSelecionado == metodo;
+
+    return GestureDetector(
+      onTap: () => setState(() => _metodoSelecionado = metodo),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.white.withOpacity(0.2)
+              : Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? Colors.white : Colors.white54,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Radio<String>(
+              value: metodo,
+              groupValue: _metodoSelecionado,
+              onChanged: (value) => setState(() => _metodoSelecionado = value),
+              activeColor: Colors.white,
+              fillColor: MaterialStateProperty.all(Colors.white),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              metodo,
+              style: const TextStyle(fontSize: 16, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CompraProcessamentoPage extends StatefulWidget {
+  final int userId;
+  const CompraProcessamentoPage({super.key, required this.userId});
+
+  @override
+  State<CompraProcessamentoPage> createState() =>
+      _CompraProcessamentoPageState();
+}
+
+class _CompraProcessamentoPageState extends State<CompraProcessamentoPage>
+    with SingleTickerProviderStateMixin {
+  bool _isProcessing = true; // para controlar qual conteúdo mostrar
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.elasticOut,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        // Fase 1: processo de compra (3 segundos)
+        await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
+
+        // Muda para fase 2 - mostrar sucesso com animação
+        setState(() {
+          _isProcessing = false;
+        });
+
+        // Iniciar animação do ícone
+        _animationController.forward();
+
+        // Esperar 2 segundos antes de navegar
+        await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(userId: widget.userId),
+          ),
+        );
+      } catch (e, stack) {
+        debugPrint('Erro na navegação: $e');
+        debugPrintStack(stackTrace: stack);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 255, 209, 2),
+              Color.fromARGB(255, 255, 62, 194),
+              Color.fromARGB(255, 130, 39, 254),
+            ],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: _isProcessing
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'A processar a tua compra...',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ],
+                  )
+                : ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: Colors.white,
+                          size: 100,
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Compra efetuada com sucesso!',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }

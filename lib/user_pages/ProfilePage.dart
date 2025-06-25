@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:vibemaker/auth/login_page.dart';
 import 'package:vibemaker/engine_codes/userid.dart';
 
 class PerfilPage extends StatefulWidget {
@@ -370,6 +371,38 @@ class _PerfilPageState extends State<PerfilPage> {
                           passwordController.clear();
                         });
                       }
+                    },
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Botão Terminar Sessão
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    label: const Text(
+                      'Terminar Sessão',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    onPressed: () async {
+                      // Limpa a sessão do utilizador
+                      UserSession().clear();
+
+                      // Navega para a página de login (ajusta conforme o teu app)
+                      if (!mounted) return;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      );
                     },
                   ),
                 ],

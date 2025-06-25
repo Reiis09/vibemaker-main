@@ -64,7 +64,7 @@ class _BilhetesCompradosPageState extends State<BilhetesCompradosPage> {
                 padding: EdgeInsets.symmetric(vertical: 20),
                 child: Center(
                   child: Text(
-                    'Meus Bilhetes Comprados',
+                    'Bilhetes Comprados',
                     style: TextStyle(
                       fontSize: 22,
                       color: Colors.white,
