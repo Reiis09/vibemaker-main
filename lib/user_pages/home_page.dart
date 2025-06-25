@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:vibemaker/user_pages/Events.dart';
+import 'package:vibemaker/user_pages/ProfilePage.dart';
 import 'package:vibemaker/user_pages/ViewTickets.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomePage> {
       const InicioPage(),
       const EventosPage(),
       BilhetesCompradosPage(userId: widget.userId),
-      // const MenuPage(),
+      PerfilPage(userId: widget.userId),
       Center(
         child: Text("Eventos", style: TextStyle(color: Colors.white)),
       ),
@@ -67,8 +68,8 @@ class _HomePageState extends State<HomePage> {
             tabs: const [
               GButton(icon: Icons.home, text: 'Início'),
               GButton(icon: Icons.shopping_bag, text: 'Eventos'),
-              GButton(icon: Icons.add_circle_outline, text: 'Novo'),
-              GButton(icon: Icons.menu, text: 'Menu'),
+              GButton(icon: Icons.add_circle_outline, text: 'Bilhetes'),
+              GButton(icon: Icons.menu, text: 'Perfil'),
             ],
           ),
         ),
@@ -114,7 +115,7 @@ class InicioPage extends StatelessWidget {
               ),
               const CircleAvatar(
                 radius: 24,
-                backgroundImage: AssetImage('assets/logos/avatar.jpg'),
+                backgroundImage: AssetImage('assets/logos/avatar.png'),
               ),
             ],
           ),

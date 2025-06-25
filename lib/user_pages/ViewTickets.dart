@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:vibemaker/user_pages/TicketDetails.dart';
 
 class BilhetesCompradosPage extends StatefulWidget {
   final int userId;
@@ -26,12 +27,15 @@ class _BilhetesCompradosPageState extends State<BilhetesCompradosPage> {
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
+
       final allInscricoes = jsonList
           .map((json) => Inscricao.fromJson(json))
           .toList();
+
       final userInscricoes = allInscricoes
-          .where((inscricao) => inscricao.idUser == userId)
+          .where((i) => i.idUser == userId)
           .toList();
+
       return userInscricoes;
     } else {
       throw Exception('Erro ao carregar bilhetes');
@@ -41,7 +45,6 @@ class _BilhetesCompradosPageState extends State<BilhetesCompradosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Fundo com gradiente igual ao Login/Register
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -57,125 +60,80 @@ class _BilhetesCompradosPageState extends State<BilhetesCompradosPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // AppBar customizada dentro do container
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 20,
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(
+                  child: Text(
+                    'Meus Bilhetes Comprados',
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Bilhetes Comprados',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-
               Expanded(
                 child: FutureBuilder<List<Inscricao>>(
                   future: _futureBilhetes,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          'Erro: ${snapshot.error}',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      );
+                      return Center(child: Text('Erro: ${snapshot.error}'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return const Center(
-                        child: Text(
-                          'Nenhum bilhete comprado.',
-                          style: TextStyle(color: Colors.white70, fontSize: 18),
-                        ),
+                        child: Text('Nenhum bilhete comprado.'),
                       );
                     } else {
                       final bilhetes = snapshot.data!;
-                      return ListView.separated(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+                      return ListView.builder(
                         itemCount: bilhetes.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final inscricao = bilhetes[index];
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  offset: const Offset(0, 3),
-                                  blurRadius: 6,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      DetalhesBilhetePage(inscricao: inscricao),
                                 ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Bilhete #${inscricao.idInscricao}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
+                              );
+                            },
+                            child: Card(
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 6,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Bilhete #${inscricao.idInscricao}',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text('Evento: ${inscricao.idEvento}'),
+                                    Text(
+                                      'Data: ${inscricao.dataInscricao.toLocal().toString().split(" ")[0]}',
+                                    ),
+                                    Text(
+                                      'Valor pago: €${inscricao.valorPago.toStringAsFixed(2)}',
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Evento: ${inscricao.idEvento}',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Data: ${_formatDate(inscricao.dataInscricao)}',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Valor Pago: €${inscricao.valorPago.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'QR Code: ${inscricao.qrcode}',
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 255, 209, 2),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           );
                         },
@@ -189,10 +147,6 @@ class _BilhetesCompradosPageState extends State<BilhetesCompradosPage> {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }
 
