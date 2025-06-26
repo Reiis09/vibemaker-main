@@ -23,49 +23,59 @@ class AdminPage extends StatelessWidget {
             end: Alignment.bottomLeft,
           ),
         ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Painel de Administração",
-                  style: TextStyle(
-                    fontSize: 26,
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.admin_panel_settings_rounded,
+                    size: 60,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                const SizedBox(height: 40),
-                _buildAdminButton(
-                  context,
-                  icon: Icons.add_circle_outline,
-                  text: "Criar Evento",
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CriarEventoPage(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-                _buildAdminButton(
-                  context,
-                  icon: Icons.add_circle_outline,
-                  text: "Ver Eventos",
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const VerEventosPage(),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Painel de Administração",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  _buildModernButton(
+                    context,
+                    icon: Icons.add_circle_outline_rounded,
+                    text: "Criar Evento",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CriarEventoPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _buildModernButton(
+                    context,
+                    icon: Icons.event_note_rounded,
+                    text: "Ver Eventos",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const VerEventosPage(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -73,45 +83,26 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAdminButton(
+  Widget _buildModernButton(
     BuildContext context, {
     required IconData icon,
     required String text,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.black, size: 28),
-              const SizedBox(width: 12),
-              Text(
-                text,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
+    return ElevatedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 24),
+      label: Text(
+        text,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white.withOpacity(0.95),
+        foregroundColor: Colors.black87,
+        minimumSize: const Size(double.infinity, 60),
+        elevation: 8,
+        shadowColor: Colors.black26,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

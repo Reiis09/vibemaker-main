@@ -94,6 +94,13 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 4,
+        onPressed: () => Navigator.pop(context),
+        child: const Icon(Icons.arrow_back),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -117,43 +124,44 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
                   const Text(
                     'Criar Evento',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 30),
                   _buildTextField(
                     _nomeController,
                     'Nome do Evento',
                     'Nome é obrigatório',
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   _buildTextField(
                     _descricaoController,
                     'Descrição',
                     'Descrição é obrigatória',
-                    maxLines: 2,
+                    maxLines: 3,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   _buildTextField(
                     _dataController,
                     'Data e Hora (ex: 2025-06-25T21:00:00)',
                     'Data é obrigatória',
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   _buildTextField(
                     _precoController,
                     'Preço (ex: 10.0)',
                     'Preço é obrigatório',
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   _buildTextField(
                     _lotacaoController,
                     'Lotação máxima (ex: 200)',
                     'Lotação é obrigatória',
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Checkbox(
@@ -172,7 +180,7 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
                   ),
                   if (_errorMessage != null)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       child: Text(
                         _errorMessage!,
                         style: const TextStyle(color: Colors.redAccent),
@@ -185,19 +193,16 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 14,
+                        horizontal: 48,
+                        vertical: 16,
                       ),
+                      elevation: 6,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 3),
-                          )
+                        ? const CircularProgressIndicator()
                         : const Text(
                             'Criar Evento',
                             style: TextStyle(fontSize: 18),
